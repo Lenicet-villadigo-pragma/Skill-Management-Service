@@ -1,3 +1,24 @@
 spring:
+  webflux:
+    base-path: /skills
   application:
     name: Skill-Management-Service
+  r2dbc:
+    url: r2dbc:mysql://<your_url>:3306/<your_database_name>?useSSL=false&serverTimezone=UTC
+    username: <yor_username>
+    password: <your_password>
+    properties:
+      sslMode: DISABLED
+    sql:
+      init:
+        mode: always
+external:
+  services:
+    technology:
+      base-url: http://localhost:8090/tecnologies
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    config-url: /skills/v3/api-docs/swagger-config
+    url: /skills/v3/api-docs
