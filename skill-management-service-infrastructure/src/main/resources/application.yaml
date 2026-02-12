@@ -9,16 +9,40 @@ spring:
     password: <your_password>
     properties:
       sslMode: DISABLED
-    sql:
-      init:
-        mode: always
+      serverTimezone: UTC
+      useUnicode: true
+      characterEncoding: UTF-8
+    # Gestión de conexiones
+    pool:
+      initial-size: 5        # Conexiones creadas al arrancar
+      max-size: 10           # Límite máximo (ajusta según tu RAM/CPU)
+      max-idle-time: 30m     # Cierra conexiones inactivas
+      max-life-time: 60m     # Evita conexiones "zombies" muy viejas
+      validation-query: SELECT 1
+  sql:
+    init:
+      mode: always
 external:
   services:
     technology:
-      base-url: http://localhost:8090/tecnologies
+      base-url: http://localhost:8090/technologies
 
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
     config-url: /skills/v3/api-docs/swagger-config
     url: /skills/v3/api-docs
+
+#variables para hacer switch
+flags:
+  webclient-builder-debug: true
+
+# Configuración de logging para R2DBC, borrar una vez usado
+logging:
+  level:
+    root: INFO # borrar
+    org.springframework.web.reactive.function.client: DEBUG # borrar
+    org.springframework.http.server.reactive: DEBUG # borrar
+    io.r2dbc.pool: DEBUG
+    org.springframework.r2dbc: DEBUG
+    org.springframework.web.reactive.function.client.WebClient: DEBUG

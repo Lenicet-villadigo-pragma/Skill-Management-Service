@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.ServerWebInputException;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
@@ -34,11 +35,28 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
 
         ErrorResponse errorResponse = new ErrorResponse(
                 status.value(),
-                ex.getMessage(),
+                getErrorMessage(ex),
                 LocalDateTime.now()
         );
 
         return writeResponse(exchange, status, errorResponse);
+    }
+
+    private String getErrorMessage(Throwable ex) {
+        String message = ex.getMessage() == null || ex.getMessage().isEmpty() ? "An unexpected error occurred" :  ex.getMessage();
+        if(ex instanceof ServerWebInputException e){
+            try{
+                String reason = e.getReason();
+                String parameter = (e.getMethodParameter() != null
+                        && e.getMethodParameter().getParameterName() != null)
+                        ? e.getMethodParameter().getParameterName() : "desconocido";
+                message = String.format("Error de entrada en el parámetro [%s]. Razón: %s", parameter, reason);
+            } catch (Exception exception){
+                log.error("No se pudo obtener el error detallado de ServerWebInputException");
+            }
+
+        }
+        return message;
     }
 
     private HttpStatus determineStatus(Throwable ex) {
@@ -47,6 +65,7 @@ public class GlobalExceptionHandler implements ErrorWebExceptionHandler {
             case IllegalArgumentException e-> HttpStatus.BAD_REQUEST;
             case InconsistencyDataException e-> HttpStatus.CONFLICT;
             case GenericDatabaseException e ->HttpStatus.CONFLICT;
+            case ServerWebInputException e -> HttpStatus.BAD_REQUEST;
             default -> HttpStatus.INTERNAL_SERVER_ERROR;
         };
     }

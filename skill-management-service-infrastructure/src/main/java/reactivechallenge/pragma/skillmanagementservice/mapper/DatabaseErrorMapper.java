@@ -10,7 +10,7 @@ public class DatabaseErrorMapper {
     public Throwable map(Throwable e) {
         if (e instanceof org.springframework.dao.DataIntegrityViolationException) {
 
-            if (e.getMessage().contains("technology.name_skill_unique")) {
+            if (e.getMessage().contains("name_skill_unique")) {
                 return new BusinessDomainException("Ya existe una capacidad con ese nombre registrado.");
             }
 

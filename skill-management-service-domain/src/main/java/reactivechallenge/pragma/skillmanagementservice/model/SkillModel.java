@@ -33,4 +33,11 @@ public record SkillModel(Long id, String name, String description, List<Technolo
             throw new BusinessDomainException("La lista de tecnologías no puede contener elementos duplicados");
         }
     }
+
+    public List<String> getTechnologyIdsAsString() {
+        return technologies.stream()
+                .map(TechnologyExternalModel::id)
+                .map(String::valueOf)
+                .toList();
+    }
 }

@@ -8,6 +8,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
-    runtimeOnly("io.asyncer:r2dbc-mysql:1.0.2")
+    implementation("org.springdoc:springdoc-openapi-starter-webflux-ui")
+    implementation("io.r2dbc:r2dbc-pool")
+    runtimeOnly("io.asyncer:r2dbc-mysql")
 }

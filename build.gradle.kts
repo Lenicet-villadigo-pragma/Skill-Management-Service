@@ -15,6 +15,9 @@ allprojects {
     }
 }
 
+val springDocVersion = "2.6.0"
+val r2dbcMysqlVersion = "1.0.2"
+
 subprojects {
     apply(plugin = "java-library")
     apply(plugin = "io.spring.dependency-management")
@@ -28,6 +31,10 @@ subprojects {
     configure<DependencyManagementExtension> {
         imports {
             mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+        }
+        dependencies {
+            dependency("org.springdoc:springdoc-openapi-starter-webflux-ui:${springDocVersion}")
+            dependency("io.asyncer:r2dbc-mysql:${r2dbcMysqlVersion}")
         }
     }
 

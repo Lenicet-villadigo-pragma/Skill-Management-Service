@@ -2,6 +2,8 @@ package reactivechallenge.pragma.skillmanagementservice.spi;
 
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface ITechnologyServicePort {
-    Mono<Boolean> existsById(Long technologyId);
+    Mono<Boolean> existsById(List<String> technologyIds);
 }
