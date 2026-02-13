@@ -26,7 +26,7 @@ public class SkillRouter {
     @Bean
     @RouterOperations({
             @RouterOperation(
-                    path = "/create/",
+                    path = "/create",
                     produces = {
                             MediaType.APPLICATION_JSON_VALUE
                     },
@@ -56,6 +56,6 @@ public class SkillRouter {
             )
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
-        return route(POST("/create/").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill);
+        return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill);
     }
 }

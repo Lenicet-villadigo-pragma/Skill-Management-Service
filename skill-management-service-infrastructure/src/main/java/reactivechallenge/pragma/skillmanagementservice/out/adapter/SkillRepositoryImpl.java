@@ -10,7 +10,6 @@ import reactivechallenge.pragma.skillmanagementservice.out.entity.SkillTechnolog
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillRepository;
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillTechnologyRepository;
 import reactivechallenge.pragma.skillmanagementservice.spi.ISkillRepositoryPort;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -44,40 +43,5 @@ public record SkillRepositoryImpl(
 
         return skillTechnologyRepository.saveAll(skillTechnologyEntities)
                 .then(Mono.just(skillModel));
-    }
-
-    @Override
-    public Mono<SkillModel> findById(Long id) {
-        return null;
-    }
-
-    @Override
-    public Flux<SkillModel> findAll() {
-        return null;
-    }
-
-    @Override
-    public Mono<Void> deleteById(Long id) {
-        return null;
-    }
-
-    @Override
-    public Mono<Void> delete(SkillModel entity) {
-        return null;
-    }
-
-    @Override
-    public Mono<Boolean> existsById(Long id) {
-        return null;
-    }
-
-    @Override
-    public Mono<Long> count() {
-        return null;
-    }
-
-    @Override
-    public Mono<Void> deleteAll() {
-        return null;
     }
 }
