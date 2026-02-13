@@ -2,10 +2,8 @@ package reactivechallenge.pragma.skillmanagementservice.out.adapter;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactivechallenge.pragma.skillmanagementservice.exception.BusinessDomainException;
 import reactivechallenge.pragma.skillmanagementservice.exception.InconsistencyDataException;
 import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePort;
 import reactor.core.publisher.Mono;

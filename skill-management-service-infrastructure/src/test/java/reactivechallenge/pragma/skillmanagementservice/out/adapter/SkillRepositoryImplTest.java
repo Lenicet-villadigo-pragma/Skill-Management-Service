@@ -12,6 +12,7 @@ import reactivechallenge.pragma.skillmanagementservice.mapper.SkillTechnologyEnt
 import reactivechallenge.pragma.skillmanagementservice.model.SkillModel;
 import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
 import reactivechallenge.pragma.skillmanagementservice.out.entity.SkillEntity;
+import reactivechallenge.pragma.skillmanagementservice.out.entity.SkillTechnologyEntity;
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillRepository;
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillTechnologyRepository;
 import reactor.core.publisher.Flux;
@@ -21,6 +22,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,9 +54,10 @@ class SkillRepositoryImplTest {
          SkillEntity skillEntitySaved = new SkillEntity(1L, "Java", "Description");
          SkillModel skillModelToBeSaved= new SkillModel(null, "Java", "Description", technologies);
          SkillModel skillModelSaved = new SkillModel(1L, "Java", "Description", technologies);
+         List<SkillTechnologyEntity> skillTechEntityList = List.of(new SkillTechnologyEntity(1L, 1L));
 
          when(skillRepositoryMock.save(any(SkillEntity.class))).thenReturn(Mono.just(skillEntitySaved));
-         when(skillTechnologyRepositoryMock.saveAll(any(List.class))).thenReturn(Flux.just(skillEntitySaved));
+         when(skillTechnologyRepositoryMock.saveAll(anyList())).thenReturn(Flux.fromIterable(skillTechEntityList));
 
          // Act
             Mono<SkillModel> result = skillRepositoryImpl.save(skillModelToBeSaved);

@@ -11,4 +11,5 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webflux-ui")
     implementation("io.r2dbc:r2dbc-pool")
     runtimeOnly("io.asyncer:r2dbc-mysql")
+    testImplementation("com.squareup.okhttp3:mockwebserver")
 }

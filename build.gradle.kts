@@ -17,6 +17,7 @@ allprojects {
 
 val springDocVersion = "2.6.0"
 val r2dbcMysqlVersion = "1.0.2"
+val squareupOkhttp3Version = "4.12.0"
 
 subprojects {
     apply(plugin = "java-library")
@@ -35,6 +36,7 @@ subprojects {
         dependencies {
             dependency("org.springdoc:springdoc-openapi-starter-webflux-ui:${springDocVersion}")
             dependency("io.asyncer:r2dbc-mysql:${r2dbcMysqlVersion}")
+            dependency("com.squareup.okhttp3:mockwebserver:${squareupOkhttp3Version}")
         }
     }
 
