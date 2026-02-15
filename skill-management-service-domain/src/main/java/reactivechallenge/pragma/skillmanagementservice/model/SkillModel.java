@@ -20,8 +20,9 @@ public record SkillModel(Long id, String name, String description, List<Technolo
     }
 
     private void validateTechnologies(List<TechnologyExternalModel> technologies) {
-        if (technologies == null || technologies.isEmpty() || technologies.size() <= 2) {
-            throw new BusinessDomainException("La lista de tecnologías no puede ser nula, vacía o contener menos de 3 elementos");
+        if (technologies == null || technologies.isEmpty() || technologies.size() <= 2 || technologies.size() > 20) {
+            throw new BusinessDomainException("La lista de tecnologías no puede ser nula, vacía, " +
+                    "contener menos de 3 elementos o más de 20.");
         }
 
         // Validar que no haya tecnologías duplicadas

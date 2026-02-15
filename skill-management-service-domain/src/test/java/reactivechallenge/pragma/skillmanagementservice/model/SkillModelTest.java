@@ -7,10 +7,10 @@ import reactivechallenge.pragma.skillmanagementservice.exception.BusinessDomainE
 
 import java.util.List;
 
-public class SkillModelTest {
+class SkillModelTest {
 
     @Test
-    public void createSkillModelSuccessful(){
+    void createSkillModelSuccessful(){
         // Arrange
         SkillModel skillModel = null;
         List<TechnologyExternalModel> technologyExternalModelList = List.of(
@@ -31,7 +31,7 @@ public class SkillModelTest {
     }
 
     @Test
-    public void createSkillModelFailsBecauseEmptyName(){
+    void createSkillModelFailsBecauseEmptyName(){
         // Arrange
         SkillModel skillModel = null;
         BusinessDomainException businessDomainException = null;
@@ -55,7 +55,7 @@ public class SkillModelTest {
     }
 
     @Test
-    public void createSkillModelFailsBecauseNullTechs(){
+    void createSkillModelFailsBecauseNullTechs(){
         // Arrange
         SkillModel skillModel = null;
         BusinessDomainException businessDomainException = null;
@@ -70,12 +70,13 @@ public class SkillModelTest {
         //Assert
         AssertionErrors.assertNull("Se espera que Skill model no sea creado por nombre vacío o nulo", skillModel);
         AssertionErrors.assertNotNull("Se espera que BusinessDomainException sea lanzado", businessDomainException);
-        Assertions.assertEquals("La lista de tecnologías no puede ser nula, vacía o contener menos de 3 elementos"
+        Assertions.assertEquals("La lista de tecnologías no puede ser nula, vacía, contener menos de 3 elementos" +
+                        " o más de 20."
                 , businessDomainException.getMessage());
     }
 
     @Test
-    public void createSkillModelReturnsTechIdsAsString(){
+    void createSkillModelReturnsTechIdsAsString(){
         // Arrange
         List<TechnologyExternalModel> technologyExternalModelList = List.of(
                 new TechnologyExternalModel(1L)

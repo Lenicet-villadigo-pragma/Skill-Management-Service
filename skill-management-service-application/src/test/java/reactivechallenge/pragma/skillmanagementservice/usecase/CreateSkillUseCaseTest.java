@@ -19,7 +19,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class CreateSkillUseCaseTest {
+class CreateSkillUseCaseTest {
 
 
     @Mock
