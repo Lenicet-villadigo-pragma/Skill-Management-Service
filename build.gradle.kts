@@ -31,14 +31,24 @@ subprojects {
         }
     }
 
+    repositories {
+        mavenCentral()
+    }
+
     dependencies {
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
-        testImplementation("org.springframework.boot:spring-boot-starter-test")
+        "testImplementation"("org.springframework.boot:spring-boot-starter-test")
+        "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
         testImplementation("io.projectreactor:reactor-test")
     }
 
     tasks.withType<Test> {
         useJUnitPlatform()
+
+        testLogging {
+            events("passed", "skipped", "failed")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        }
     }
 }
