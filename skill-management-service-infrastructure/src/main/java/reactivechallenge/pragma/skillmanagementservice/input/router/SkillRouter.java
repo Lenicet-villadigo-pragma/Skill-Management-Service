@@ -1,6 +1,8 @@
 package reactivechallenge.pragma.skillmanagementservice.input.router;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -14,10 +16,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
+import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillPaginatedDto;
 import reactivechallenge.pragma.skillmanagementservice.input.handler.SkillHandler;
 
-import static org.springframework.web.reactive.function.server.RequestPredicates.POST;
-import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
+import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
@@ -54,8 +56,44 @@ public class SkillRouter {
                             )
                     )
             )
+            ,@RouterOperation(
+            path = "/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}",
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE
+            },
+            method = RequestMethod.GET,
+            beanClass = SkillHandler.class,
+            beanMethod = "listSkills",
+            operation = @Operation(
+                    operationId = "listSkills",
+                    summary = "Listar capacidades existentes",
+                    description = "Se obtienen las capacidades con sus respectivas tecnologías, " +
+                            "se puede ordenar ascendente (asc) o descendente (desc) ya sea por nombre o " +
+                            "cantidad de tecnologías asociadas",
+                    tags = {"Gestión de Capacidades"},
+                    responses = {
+                            @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Ok",
+                                    content = @Content(schema = @Schema(implementation = SkillPaginatedDto.class))
+                            ),
+                            @ApiResponse(
+                                    responseCode = "400",
+                                    description = "Invalid Input"
+                            )
+                    },
+                    parameters = {
+                            @Parameter(in = ParameterIn.PATH, name = "sortField", description = "campo opcional para ordenar, valore: name o total_technologies")
+                            ,@Parameter(in = ParameterIn.PATH, name = "sortOrder", description = "Sentido de ordenación, opcional. valores: asc o desc")
+                            ,@Parameter(in = ParameterIn.PATH, name = "pageNumber", description = "Número de página, opcional")
+                            ,@Parameter(in = ParameterIn.PATH, name = "pageSize", description = "Cantidad de registros por página, opcional")
+
+                    }
+            )
+    )
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
-        return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill);
+        return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
+                .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills);
     }
 }

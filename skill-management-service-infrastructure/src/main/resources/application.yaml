@@ -36,6 +36,10 @@ springdoc:
 #variables para hacer switch
 flags:
   webclient-builder-debug: true
+app:
+  pagination:
+    default-page: 0
+    default-size: 10
 
 # Configuración de logging para R2DBC, borrar una vez usado
 logging:

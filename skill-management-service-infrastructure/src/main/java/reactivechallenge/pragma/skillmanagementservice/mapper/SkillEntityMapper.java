@@ -22,18 +22,6 @@ public class SkillEntityMapper {
         );
     }
 
-    public SkillModel toModel(SkillEntity entity) {
-        if (entity == null) {
-            return null;
-        }
-        return new SkillModel(
-                entity.id(),
-                entity.name(),
-                entity.description(),
-                Collections.emptyList()
-        );
-    }
-
     public SkillEntity toEntity(SkillModel model) {
         if (model == null) {
             return null;
@@ -41,7 +29,8 @@ public class SkillEntityMapper {
         return new SkillEntity(
                 model.id(),
                 model.name(),
-                model.description()
+                model.description(),
+                model.technologies().size()
         );
     }
 }

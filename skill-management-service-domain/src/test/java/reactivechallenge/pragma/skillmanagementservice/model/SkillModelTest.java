@@ -14,9 +14,9 @@ class SkillModelTest {
         // Arrange
         SkillModel skillModel = null;
         List<TechnologyExternalModel> technologyExternalModelList = List.of(
-                new TechnologyExternalModel(1L)
-                ,new TechnologyExternalModel(2L)
-                ,new TechnologyExternalModel(3L)
+                new TechnologyExternalModel(1L, "")
+                ,new TechnologyExternalModel(2L, "")
+                ,new TechnologyExternalModel(3L, "")
         );
 
         // Act
@@ -36,9 +36,9 @@ class SkillModelTest {
         SkillModel skillModel = null;
         BusinessDomainException businessDomainException = null;
         List<TechnologyExternalModel> technologyExternalModelList = List.of(
-                new TechnologyExternalModel(1L)
-                ,new TechnologyExternalModel(2L)
-                ,new TechnologyExternalModel(3L)
+                new TechnologyExternalModel(1L,"")
+                ,new TechnologyExternalModel(2L,"")
+                ,new TechnologyExternalModel(3L,"")
         );
 
         // Act
@@ -79,9 +79,9 @@ class SkillModelTest {
     void createSkillModelReturnsTechIdsAsString(){
         // Arrange
         List<TechnologyExternalModel> technologyExternalModelList = List.of(
-                new TechnologyExternalModel(1L)
-                ,new TechnologyExternalModel(2L)
-                ,new TechnologyExternalModel(3L)
+                new TechnologyExternalModel(1L,"")
+                ,new TechnologyExternalModel(2L,"")
+                ,new TechnologyExternalModel(3L,"")
         );
         SkillModel skillModel = new SkillModel(null,"name", "description", technologyExternalModelList);
         List<String> techIds = null;

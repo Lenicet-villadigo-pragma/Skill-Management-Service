@@ -8,5 +8,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public record SkillEntity(
         @Id @Column("id") Long id,
         @Column("name") String name,
-        @Column("description") String description
+        @Column("description") String description,
+        @Column("total_technologies") Integer totalTechnologies
 ) {}

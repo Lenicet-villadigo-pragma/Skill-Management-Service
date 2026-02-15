@@ -7,7 +7,7 @@ public record TechnologyExternalDto(
         @NotNull Long id
 ) {
     public TechnologyExternalModel toModel() {
-        return new TechnologyExternalModel(this.id);
+        return new TechnologyExternalModel(this.id,"");
     }
 
     public static TechnologyExternalDto fromModel(TechnologyExternalModel model) {

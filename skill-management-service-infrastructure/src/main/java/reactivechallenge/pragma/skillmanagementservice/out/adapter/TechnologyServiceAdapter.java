@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactivechallenge.pragma.skillmanagementservice.exception.InconsistencyDataException;
+import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
 import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
@@ -45,5 +47,25 @@ public class TechnologyServiceAdapter implements ITechnologyServicePort {
                                         String.format("Error al verificar la existencia de las tecnologías con ids %s, mensaje: %s"
                                                 , techIdsAsString, e.getMessage())))
                 );
+    }
+
+    @Override
+    public Flux<TechnologyExternalModel> getTechsByIds(List<String> techIds) {
+        String techIdsAsString = String.join(", ", techIds);
+
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/getByIds")
+                        .queryParam("techIds", techIdsAsString)
+                        .build())
+                .retrieve()
+                .bodyToFlux(TechnologyExternalModel.class)
+                .timeout(Duration.ofSeconds(5))
+                .onErrorResume(e -> {
+                    log.error("Error al obtener la lista de las tecnologías con ids {}: {}. retornando flujo vacío"
+                            , techIdsAsString, e.getMessage());
+
+                    return  Flux.empty();
+                });
     }
 }

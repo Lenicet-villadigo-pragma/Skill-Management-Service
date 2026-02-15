@@ -10,11 +10,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactivechallenge.pragma.skillmanagementservice.api.IRegisterSkillServicePort;
+import reactivechallenge.pragma.skillmanagementservice.api.IRetrieveSkillsServicePort;
 import reactivechallenge.pragma.skillmanagementservice.exception.BusinessDomainException;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.TechnologyExternalDto;
 import reactivechallenge.pragma.skillmanagementservice.model.SkillModel;
 import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
+import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePort;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -30,11 +32,18 @@ class SkillHandlerTest {
     @Mock
     private IRegisterSkillServicePort registerSkillServicePort;
 
+    @Mock
+    private IRetrieveSkillsServicePort retrieveSkillsServicePort;
+
+    @Mock
+    ITechnologyServicePort technologyServicePort;
+
     private SkillHandler skillHandler;
 
     @BeforeEach
     void setUp() {
-        skillHandler = new SkillHandler(registerSkillServicePort);
+        skillHandler = new SkillHandler(registerSkillServicePort, retrieveSkillsServicePort
+        ,technologyServicePort,0,10);
     }
 
     @Test
@@ -99,7 +108,7 @@ class SkillHandlerTest {
     void createSkillSuccess() {
         // Arrange
         List<TechnologyExternalDto> technologyIds = List.of(new TechnologyExternalDto(1L), new TechnologyExternalDto(2L), new TechnologyExternalDto(3L));
-        List<TechnologyExternalModel> technologyModelIds = List.of(new TechnologyExternalModel(1L), new TechnologyExternalModel(2L), new TechnologyExternalModel(3L));
+        List<TechnologyExternalModel> technologyModelIds = List.of(new TechnologyExternalModel(1L,""), new TechnologyExternalModel(2L,""), new TechnologyExternalModel(3L,""));
         SkillCreateDto validDto = new SkillCreateDto("Java", "Valid description", technologyIds);
         ServerRequest request = mock(ServerRequest.class);
 

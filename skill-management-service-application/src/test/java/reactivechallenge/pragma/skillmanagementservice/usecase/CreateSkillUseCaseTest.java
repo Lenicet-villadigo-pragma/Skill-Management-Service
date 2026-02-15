@@ -35,8 +35,8 @@ class CreateSkillUseCaseTest {
     @DisplayName("Create technology successfully")
     void createSkillSuccess() {
         // Arrange
-        List<TechnologyExternalModel> technologyExternalModelList = List.of(new TechnologyExternalModel(1L)
-                ,new TechnologyExternalModel(2L), new TechnologyExternalModel(3L));
+        List<TechnologyExternalModel> technologyExternalModelList = List.of(new TechnologyExternalModel(1L, "")
+                ,new TechnologyExternalModel(2L, ""), new TechnologyExternalModel(3L, ""));
         SkillModel inputModel = new SkillModel(null, "  JAVA  Programming  ", "Description"
                 ,technologyExternalModelList);
         SkillModel returnedModel = new SkillModel(1L, "java programming", "Description"
@@ -61,8 +61,8 @@ class CreateSkillUseCaseTest {
     @DisplayName("Create technology Throw InconsistencyDataException because tech ids does not exists")
     void createSkillThrowInconsistencyDataException() {
         // Arrange
-        List<TechnologyExternalModel> technologyExternalModelList = List.of(new TechnologyExternalModel(1L)
-                ,new TechnologyExternalModel(2L), new TechnologyExternalModel(3L));
+        List<TechnologyExternalModel> technologyExternalModelList = List.of(new TechnologyExternalModel(1L, "")
+                ,new TechnologyExternalModel(2L, ""), new TechnologyExternalModel(3L, ""));
         SkillModel inputModel = new SkillModel(null, "  JAVA  Programming  ", "Description"
                 ,technologyExternalModelList);
 

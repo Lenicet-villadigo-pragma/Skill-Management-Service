@@ -48,10 +48,10 @@ class SkillRepositoryImplTest {
      @DisplayName("Save skill successfully")
      void saveSkillSuccess() {
          // Arrange
-         List<TechnologyExternalModel> technologies = List.of(new TechnologyExternalModel(1L),
-                 new TechnologyExternalModel(21L), new TechnologyExternalModel(3L));
-         SkillEntity skillEntityToBeSaved = new SkillEntity(null, "Java", "Description");
-         SkillEntity skillEntitySaved = new SkillEntity(1L, "Java", "Description");
+         List<TechnologyExternalModel> technologies = List.of(new TechnologyExternalModel(1L,""),
+                 new TechnologyExternalModel(21L,""), new TechnologyExternalModel(3L,""));
+         SkillEntity skillEntityToBeSaved = new SkillEntity(null, "Java", "Description", technologies.size());
+         SkillEntity skillEntitySaved = new SkillEntity(1L, "Java", "Description", technologies.size());
          SkillModel skillModelToBeSaved= new SkillModel(null, "Java", "Description", technologies);
          SkillModel skillModelSaved = new SkillModel(1L, "Java", "Description", technologies);
          List<SkillTechnologyEntity> skillTechEntityList = List.of(new SkillTechnologyEntity(1L, 1L));

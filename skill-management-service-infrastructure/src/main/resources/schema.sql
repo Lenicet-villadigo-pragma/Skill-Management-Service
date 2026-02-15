@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS skill (
     id BIGINT NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
     description VARCHAR(90) NOT NULL,
+    total_technologies int,
     PRIMARY KEY (id),
     UNIQUE KEY name_skill_unique (name)
 );
