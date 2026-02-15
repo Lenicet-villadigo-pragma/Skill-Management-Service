@@ -23,7 +23,7 @@ public class CreateSkillUseCase implements IRegisterSkillServicePort {
         return technologyServicePort.existsById(skillModel.getTechnologyIdsAsString())
                 .doOnNext(exists -> log.info("Exiten las tecnologías enviasdas? {}", exists))
                 .flatMap(exists -> {
-                    if (!exists) {
+                    if (Boolean.FALSE.equals(exists)) {
                         log.error("La tecnología con id: {} no existe", skillModel.getTechnologyIdsAsString());
                         return Mono.error(new InconsistencyDataException(
                                 String.format("La tecnología con id: %s no existe", skillModel.getTechnologyIdsAsString())
