@@ -8,9 +8,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
-import reactivechallenge.pragma.skillmanagementservice.input.dto.TechnologyExternalDto;
+import reactivechallenge.pragma.skillmanagementservice.input.dto.*;
 import reactivechallenge.pragma.skillmanagementservice.input.handler.SkillHandler;
 import reactor.core.publisher.Mono;
 
@@ -55,6 +55,32 @@ class SkillRouterTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(SkillCreateDto.class)
                 .isEqualTo(skillCreateDto);
+    }
+
+    @Test
+    @DisplayName("Router routes GET /retrieve to handler")
+    void listSkillRouteTest() {
+        // Arrange
+        List<ListSkillResponseDto> listSkillResponseDto = List.of(new ListSkillResponseDto(null, null, null));
+        SkillPaginatedDto<ListSkillResponseDto>  skillPaginatedDto = new SkillPaginatedDto<>(listSkillResponseDto, 1L, 0, 10);
+
+        when(skillHandlerMock.listSkills(any(ServerRequest.class))).thenReturn(
+                ServerResponse.ok().body(Mono.just(skillPaginatedDto), SkillPaginatedDto.class)
+        );
+
+        WebTestClient webTestClient = WebTestClient
+                .bindToRouterFunction(skillRouter.skillRoutes(skillHandlerMock))
+                .build();
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"
+                        ,"name", "asc", "10", "0")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ListSkillResponseDto.class)
+                .isEqualTo(listSkillResponseDto);
     }
 
 }

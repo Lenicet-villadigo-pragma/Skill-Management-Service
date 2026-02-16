@@ -1,22 +1,28 @@
 package reactivechallenge.pragma.skillmanagementservice.input.handler;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.reactive.function.server.EntityResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactivechallenge.pragma.skillmanagementservice.api.IRegisterSkillServicePort;
 import reactivechallenge.pragma.skillmanagementservice.api.IRetrieveSkillsServicePort;
 import reactivechallenge.pragma.skillmanagementservice.exception.BusinessDomainException;
-import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
-import reactivechallenge.pragma.skillmanagementservice.input.dto.TechnologyExternalDto;
+import reactivechallenge.pragma.skillmanagementservice.input.dto.*;
 import reactivechallenge.pragma.skillmanagementservice.model.SkillModel;
 import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
+import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillPaginationResult;
+import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortField;
+import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortOrder;
 import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -24,8 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SkillHandlerTest {
@@ -123,5 +131,93 @@ class SkillHandlerTest {
         StepVerifier.create(responseMono)
                 .expectNextMatches(serverResponse -> serverResponse.statusCode() == HttpStatus.CREATED)
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("List skill respond successfully when valid path variables")
+    void listSkillsSuccess() {
+        // Arrange
+        ServerRequest request = mock(ServerRequest.class);
+        List<TechnologyExternalModel> externalModelList = List.of(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        SkillModel skillModel = new SkillModel(1L, "test","description",externalModelList);
+        SkillPaginationResult<SkillModel> skillPaginationSkillModel = new SkillPaginationResult<>(List.of(skillModel),1L);
+        Mono<SkillPaginationResult<SkillModel>> skillPaginationResultMono = Mono.just(skillPaginationSkillModel);
+        Flux<TechnologyExternalModel> technologyExternalModelFlux = Flux.just(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        List<TechResponseForListDto> techResponseForListDtos = List.of(new TechResponseForListDto(1L, "test")
+                , new TechResponseForListDto(3L, "test"), new TechResponseForListDto(2L, "test"));
+        List<ListSkillResponseDto> listSkillResponseDto = List.of(new ListSkillResponseDto(1L, "test", techResponseForListDtos));
+        SkillPaginatedDto<ListSkillResponseDto> responseExpected = new SkillPaginatedDto<>(listSkillResponseDto, 1L, 0, 10);
+
+        given(request.pathVariable("sortField")).willReturn("name");
+        given(request.pathVariable("sortOrder")).willReturn("asc");
+        given(request.pathVariable("pageNumber")).willReturn("0");
+        given(request.pathVariable("pageSize")).willReturn("10");
+        when(retrieveSkillsServicePort.retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
+                , Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(skillPaginationResultMono);
+        when(technologyServicePort.getTechsByIds(anyList())).thenReturn(technologyExternalModelFlux);
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.listSkills(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .assertNext(serverResponse -> {
+                    Assertions.assertEquals(HttpStatus.OK, serverResponse.statusCode());
+
+                    if (serverResponse instanceof EntityResponse<?> entityResponse) {
+                        SkillPaginatedDto<ListSkillResponseDto> body = (SkillPaginatedDto<ListSkillResponseDto>) entityResponse.entity();
+                        Assertions.assertEquals(body, responseExpected);
+                    }
+                })
+                .verifyComplete();
+        Mockito.verify(retrieveSkillsServicePort).retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
+                , Mockito.any(Integer.class), Mockito.any(Integer.class));
+        Mockito.verify(technologyServicePort).getTechsByIds(anyList());
+    }
+
+    @Test
+    @DisplayName("List skill respond successfully when invalid path variables and takes by default")
+    void listSkillsSuccessWhenInvalidPathVariables() {
+        // Arrange
+        ServerRequest request = mock(ServerRequest.class);
+        List<TechnologyExternalModel> externalModelList = List.of(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        SkillModel skillModel = new SkillModel(1L, "test","description",externalModelList);
+        SkillPaginationResult<SkillModel> skillPaginationSkillModel = new SkillPaginationResult<>(List.of(skillModel),1L);
+        Mono<SkillPaginationResult<SkillModel>> skillPaginationResultMono = Mono.just(skillPaginationSkillModel);
+        Flux<TechnologyExternalModel> technologyExternalModelFlux = Flux.just(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        List<TechResponseForListDto> techResponseForListDtos = List.of(new TechResponseForListDto(1L, "test")
+                , new TechResponseForListDto(3L, "test"), new TechResponseForListDto(2L, "test"));
+        List<ListSkillResponseDto> listSkillResponseDto = List.of(new ListSkillResponseDto(1L, "test", techResponseForListDtos));
+        SkillPaginatedDto<ListSkillResponseDto> responseExpected = new SkillPaginatedDto<>(listSkillResponseDto, 1L, 0, 10);
+
+        given(request.pathVariable("sortField")).willReturn(null);
+        given(request.pathVariable("sortOrder")).willReturn(null);
+        given(request.pathVariable("pageNumber")).willReturn(null);
+        given(request.pathVariable("pageSize")).willReturn("string");
+        when(retrieveSkillsServicePort.retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
+                , Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(skillPaginationResultMono);
+        when(technologyServicePort.getTechsByIds(anyList())).thenReturn(technologyExternalModelFlux);
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.listSkills(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .assertNext(serverResponse -> {
+                    Assertions.assertEquals(HttpStatus.OK, serverResponse.statusCode());
+
+                    if (serverResponse instanceof EntityResponse<?> entityResponse) {
+                        SkillPaginatedDto<ListSkillResponseDto> body = (SkillPaginatedDto<ListSkillResponseDto>) entityResponse.entity();
+                        Assertions.assertEquals(body, responseExpected);
+                    }
+                })
+                .verifyComplete();
+        Mockito.verify(retrieveSkillsServicePort).retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
+                , Mockito.any(Integer.class), Mockito.any(Integer.class));
+        Mockito.verify(technologyServicePort).getTechsByIds(anyList());
     }
 }
