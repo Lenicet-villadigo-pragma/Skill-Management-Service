@@ -6,12 +6,10 @@ import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillPagin
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortField;
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortOrder;
 import reactivechallenge.pragma.skillmanagementservice.spi.ISkillRepositoryPort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ListSkillUseCase implements IRetrieveSkillsServicePort {
 
@@ -60,5 +58,13 @@ public class ListSkillUseCase implements IRetrieveSkillsServicePort {
         }
 
         return skillIds.stream().map(Long::valueOf).toList();
+    }
+
+    @Override
+    public Flux<SkillModel> getSkillsByIds(List<Long> ids) {
+        if(ids == null || ids.isEmpty()){
+            return Flux.empty();
+        }
+        return skillRepositoryPort.getSkillsById(ids.stream().filter(Objects::nonNull).toList());
     }
 }

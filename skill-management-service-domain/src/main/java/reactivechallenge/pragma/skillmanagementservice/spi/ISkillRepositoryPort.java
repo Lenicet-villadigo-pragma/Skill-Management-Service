@@ -14,4 +14,5 @@ public interface ISkillRepositoryPort {
             , Integer pageNumber, Integer pageSize);
     Mono<Long> countSkills();
     Mono<Boolean> exists(List<Long> ids);
+    Flux<SkillModel> getSkillsById(List<Long> ids);
 }

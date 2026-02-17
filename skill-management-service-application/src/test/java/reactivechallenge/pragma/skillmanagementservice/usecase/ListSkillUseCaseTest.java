@@ -17,10 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class ListSkillUseCaseTest {
@@ -180,5 +181,57 @@ class ListSkillUseCaseTest {
 
         // Assert
         assert exceptionObtained!=null && exceptionObtained.getMessage().equals(exceptionExpected.getMessage());
+    }
+
+    @DisplayName("getSkillsByIds returns list of technologies when they exist")
+    void getSkillsByIdsReturnsList() {
+        // Arrange
+        List<TechnologyExternalModel> externalModelList = List.of(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        List<Long> skillsIds = List.of(1L);
+        SkillModel skillModel=new SkillModel(null, "Java", "Programming language", externalModelList);
+        when(skillRepositoryPort.getSkillsById(skillsIds)).thenReturn(Flux.just(skillModel));
+
+        // Act
+        Flux<SkillModel> result = listSkillUseCase.getSkillsByIds(skillsIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(skillModel)
+                .verifyComplete();
+
+        verify(skillRepositoryPort).getSkillsById(skillsIds);
+    }
+
+    @Test
+    @DisplayName("getSkillsByIds returns empty when list of ids is empty")
+    void getSkillsByIdsReturnsEmpty() {
+        // Arrange
+        List<Long> skillsIds = new ArrayList<>();
+
+
+        // Act
+        Flux<SkillModel> result =listSkillUseCase.getSkillsByIds(skillsIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(skillRepositoryPort, never()).getSkillsById(skillsIds);
+    }
+
+    @Test
+    @DisplayName("getSkillsByIds returns empty when list of ids is null")
+    void getSkillsByIdsReturnsEmpty2() {
+        // Act
+        Flux<SkillModel> result = listSkillUseCase.getSkillsByIds(null);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        verify(skillRepositoryPort, never()).getSkillsById(null);
     }
 }

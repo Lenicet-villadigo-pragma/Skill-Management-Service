@@ -116,4 +116,23 @@ public class SkillHandler {
         Optional<String> stringSkillIds =  request.queryParam("skillIds");
         return retrieveSkillsServicePort.verifySkillIds(stringSkillIds.orElse(null));
     }
+
+    public Mono<ServerResponse> listSkillsById(ServerRequest request){
+        List<Long> skillsIds = getSkillIdsFromRequest(request);
+
+        return retrieveSkillsServicePort.getSkillsByIds(skillsIds)
+                .concatMap(skillModel ->
+                        technologyServicePort.getTechsByIds(skillModel.getTechnologyIdsAsString())
+                                .map(TechResponseForListDto::fromModel)
+                                .collectList()
+                                .map(listTechsDto ->
+                                        new ListSkillResponseDto(skillModel.id(), skillModel.name(), listTechsDto)
+                                )
+                )
+                .collectList()
+                .flatMap(listSkillResponseDto ->
+                    ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(listSkillResponseDto)
+                );
+    }
+
 }

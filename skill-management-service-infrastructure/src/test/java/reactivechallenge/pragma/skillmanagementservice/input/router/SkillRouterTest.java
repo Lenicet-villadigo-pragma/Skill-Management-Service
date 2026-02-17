@@ -134,4 +134,35 @@ class SkillRouterTest {
                 .expectBody(Boolean.class)
                 .isEqualTo(false);
     }
+
+    @Test
+    @DisplayName("Router routes GET /getById to handler and returns list when exists")
+    void getTechnologyByIdsRouteReturnsList() {
+        // Arrange
+        Long skillId = 1L;
+        List<TechResponseForListDto> techResponseForListDto = List.of(
+          new TechResponseForListDto(1L, "name"), new TechResponseForListDto(2L, "name")
+          , new TechResponseForListDto(3L, "name")
+        );
+        ListSkillResponseDto listSkillResponseDto = new ListSkillResponseDto(1L,"java", techResponseForListDto);
+
+        when(skillHandlerMock.listSkillsById(any(ServerRequest.class))).thenReturn(
+                ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(List.of(listSkillResponseDto))
+        );
+
+        WebTestClient webTestClient = WebTestClient
+                .bindToRouterFunction(skillRouter.skillRoutes(skillHandlerMock))
+                .build();
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/getByIds", skillId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ListSkillResponseDto.class)
+                .hasSize(1);
+    }
 }

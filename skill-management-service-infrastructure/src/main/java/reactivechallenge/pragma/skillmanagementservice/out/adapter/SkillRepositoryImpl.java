@@ -13,6 +13,7 @@ import reactivechallenge.pragma.skillmanagementservice.model.SkillModel;
 import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortField;
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortOrder;
+import reactivechallenge.pragma.skillmanagementservice.out.entity.SkillEntity;
 import reactivechallenge.pragma.skillmanagementservice.out.entity.SkillTechnologyEntity;
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillRepository;
 import reactivechallenge.pragma.skillmanagementservice.out.repository.ISkillTechnologyRepository;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 @Slf4j
@@ -47,18 +49,7 @@ public record SkillRepositoryImpl(
         Sort sort = Sort.by(Sort.Direction.fromString(skillSortOrder.getSortOrder()), skillSortField.getFieldName());
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        return skillRepository.findAllBy(pageable).concatMap(skillEntity ->
-             getTechsBySkillId(skillEntity.id()).collectList()
-                     .flatMap(techList ->{
-                        if (techList.isEmpty()) {
-                            return Mono.error(new BusinessDomainException("Skill sin tecnologías"));
-                        }
-                        return Mono.just(skillEntityMapper.toModel(skillEntity, techList));
-                     }).onErrorResume(error -> {
-                        log.warn("Omitiendo skill {} por error: {}", skillEntity.id(), error.getMessage());
-                        return Mono.empty();
-                     })
-        );
+        return getSkillModelFlux(skillRepository.findAllBy(pageable));
     }
 
     @Override
@@ -72,6 +63,11 @@ public record SkillRepositoryImpl(
                 .collectList()
                 .map(listTechs -> listTechs.size() == ids.size())
                 .onErrorMap(databaseErrorMapper::map);
+    }
+
+    @Override
+    public Flux<SkillModel> getSkillsById(List<Long> ids) {
+        return getSkillModelFlux(skillRepository.findAllById(ids));
     }
 
     private Mono<SkillModel> saveSkillTechnologies(SkillModel skillModel) {
@@ -92,5 +88,20 @@ public record SkillRepositoryImpl(
     private Flux<TechnologyExternalModel> getTechsBySkillId(Long skillId){
        return skillTechnologyRepository.findAllBySkillId(skillId)
                .map(skillTechnologyEntityMapper::toTechnologyExternalModel);
+    }
+
+    private Flux<SkillModel> getSkillModelFlux(Flux<SkillEntity> skillEntityFlux){
+        return skillEntityFlux.concatMap(skillEntity ->
+                getTechsBySkillId(skillEntity.id()).collectList()
+                        .flatMap(techList ->{
+                            if (techList.isEmpty()) {
+                                return Mono.error(new BusinessDomainException("Skill sin tecnologías"));
+                            }
+                            return Mono.just(skillEntityMapper.toModel(skillEntity, techList));
+                        }).onErrorResume(error -> {
+                            log.warn("Omitiendo skill {} por error: {}", skillEntity.id(), error.getMessage());
+                            return Mono.empty();
+                        })
+        );
     }
 }

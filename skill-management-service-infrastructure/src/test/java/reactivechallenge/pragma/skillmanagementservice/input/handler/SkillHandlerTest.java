@@ -33,8 +33,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SkillHandlerTest {
@@ -279,5 +278,97 @@ class SkillHandlerTest {
                 )
                 .expectError(IllegalArgumentException.class)
                 .verify();
+    }
+
+    @Test
+    @DisplayName("Se obtiene error al intentar obtener capacidades por ids cuando no se envían")
+    void getSkillsByIdFailsWithInvalidTechIds() {
+        // Arrange
+        ServerRequest request = mock(ServerRequest.class);
+        IllegalArgumentException error =new IllegalArgumentException("No se proporcionaron IDs de capacidades. Asegúrate de incluir el " +
+                "parámetro 'skillIds' con al menos un ID.");
+
+        given(request.queryParam("skillIds")).willReturn(Optional.empty());
+        given(retrieveSkillsServicePort.verifySkillIds(null)).willThrow(error);
+
+        // Act & Assert
+        StepVerifier.create(
+                        Mono.defer(() -> skillHandler.listSkillsById(request))
+                )
+                .expectError(IllegalArgumentException.class)
+                .verify();
+        verify(retrieveSkillsServicePort).verifySkillIds(null);
+        verify(retrieveSkillsServicePort, never()).getSkillsByIds(anyList());
+        verify(technologyServicePort, never()).getTechsByIds(anyList());
+    }
+
+    @Test
+    @DisplayName("get skill by id returns empty list when ids do not exist")
+    void getSkillsByIdReturnsEmpty() {
+        // Arrange
+        String skillId = "999";
+        List<Long> skillsIds= List.of(999L);
+        ServerRequest request = mock(ServerRequest.class);
+
+        given(request.queryParam("skillIds")).willReturn(Optional.of(skillId));
+        given(retrieveSkillsServicePort.verifySkillIds(skillId)).willReturn(skillsIds);
+        given(retrieveSkillsServicePort.getSkillsByIds(skillsIds)).willReturn(Flux.empty());
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.listSkillsById(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .assertNext(serverResponse -> {
+                    Assertions.assertEquals(HttpStatus.OK, serverResponse.statusCode());
+
+                    if (serverResponse instanceof EntityResponse<?> entityResponse) {
+                        List<?> body = (List<?>) entityResponse.entity();
+                        Assertions.assertTrue(body.isEmpty());
+                    }
+                })
+                .verifyComplete();
+        verify(retrieveSkillsServicePort).verifySkillIds(skillId);
+        verify(retrieveSkillsServicePort).getSkillsByIds(skillsIds);
+        verify(technologyServicePort, never()).getTechsByIds(anyList());
+    }
+
+    @Test
+    @DisplayName("get skill by id returns list when ids does exist")
+    void getSkillsByIdReturnsData() {
+        // Arrange
+        String skillId = "999";
+        List<Long> skillsIds= List.of(999L);
+        ServerRequest request = mock(ServerRequest.class);
+        List<TechnologyExternalModel> externalModelList = List.of(new TechnologyExternalModel(1L, "test")
+                , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
+        Flux<TechnologyExternalModel> technologyExternalModelFlux = Flux.just(
+                new TechnologyExternalModel(1L, "name"), new TechnologyExternalModel(2L, "name")
+                , new TechnologyExternalModel(3L, "name")
+        );
+        SkillModel skillModel = new SkillModel(999L, "TechName", "TechDescription", externalModelList);
+
+        given(request.queryParam("skillIds")).willReturn(Optional.of(skillId));
+        given(retrieveSkillsServicePort.verifySkillIds(skillId)).willReturn(skillsIds);
+        given(retrieveSkillsServicePort.getSkillsByIds(skillsIds)).willReturn(Flux.just(skillModel));
+        when(technologyServicePort.getTechsByIds(anyList())).thenReturn(technologyExternalModelFlux);
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.listSkillsById(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .assertNext(serverResponse -> {
+                    Assertions.assertEquals(HttpStatus.OK, serverResponse.statusCode());
+
+                    if (serverResponse instanceof EntityResponse<?> entityResponse) {
+                        List<?> body = (List<?>) entityResponse.entity();
+                        Assertions.assertEquals(1, body.size());
+                    }
+                })
+                .verifyComplete();
+        verify(retrieveSkillsServicePort).verifySkillIds(skillId);
+        verify(retrieveSkillsServicePort).getSkillsByIds(skillsIds);
+        verify(technologyServicePort).getTechsByIds(anyList());
     }
 }

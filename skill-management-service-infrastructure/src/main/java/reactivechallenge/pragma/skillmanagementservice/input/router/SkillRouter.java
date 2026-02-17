@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactivechallenge.pragma.skillmanagementservice.input.dto.ListSkillResponseDto;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillPaginatedDto;
 import reactivechallenge.pragma.skillmanagementservice.input.handler.SkillHandler;
@@ -114,10 +115,35 @@ public class SkillRouter {
                             @Parameter(in = ParameterIn.QUERY, name = "skillIds", description = "list of skill IDs")
                     })
             )
+            ,@RouterOperation(
+            path = "/getByIds",
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE
+            },
+            method = RequestMethod.GET,
+            beanClass = SkillHandler.class,
+            beanMethod = "listSkillsById",
+            operation = @Operation(
+                    operationId = "listSkillsById",
+                    summary = "Obtener capacidades por sus ids",
+                    description = "Consulta las capacidades por Id y devuelve su información.",
+                    tags = {"Gestión de Capacidades"},
+                    responses = {
+                            @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Skills retrieved",
+                                    content = @Content(schema = @Schema(implementation = ListSkillResponseDto.class))
+                            )
+                    },
+                    parameters = {
+                            @Parameter(in = ParameterIn.QUERY, name = "skillIds", description = "list of skills IDs")
+                    })
+            )
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
         return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
                 .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills)
-                .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists);
+                .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists)
+                .andRoute(GET("/getByIds"), skillHandler::listSkillsById);
     }
 }
