@@ -183,6 +183,7 @@ class ListSkillUseCaseTest {
         assert exceptionObtained!=null && exceptionObtained.getMessage().equals(exceptionExpected.getMessage());
     }
 
+    @Test
     @DisplayName("getSkillsByIds returns list of technologies when they exist")
     void getSkillsByIdsReturnsList() {
         // Arrange
