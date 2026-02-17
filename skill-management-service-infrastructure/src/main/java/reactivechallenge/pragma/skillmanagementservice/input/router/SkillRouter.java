@@ -88,12 +88,36 @@ public class SkillRouter {
                             ,@Parameter(in = ParameterIn.PATH, name = "pageNumber", description = "Número de página, opcional")
                             ,@Parameter(in = ParameterIn.PATH, name = "pageSize", description = "Cantidad de registros por página, opcional")
 
-                    }
+                    })
             )
-    )
+            ,@RouterOperation(
+            path = "/exists",
+            produces = {
+                    MediaType.APPLICATION_JSON_VALUE
+            },
+            method = RequestMethod.GET,
+            beanClass = SkillHandler.class,
+            beanMethod = "verifyIfSkillsExists",
+            operation = @Operation(
+                    operationId = "verifyIfSkillsExists",
+                    summary = "Verificar existencia de una o más capacidades",
+                    description = "Consulta si las capacidades enviadas existen en la base de datos.",
+                    tags = {"Gestión de Capacidades"},
+                    responses = {
+                            @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Skill existence verified",
+                                    content = @Content(schema = @Schema(implementation = Boolean.class))
+                            )
+                    },
+                    parameters = {
+                            @Parameter(in = ParameterIn.QUERY, name = "skillIds", description = "list of skill IDs")
+                    })
+            )
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
         return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
-                .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills);
+                .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills)
+                .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists);
     }
 }

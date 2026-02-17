@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
+import reactivechallenge.pragma.skillmanagementservice.exception.GenericDatabaseException;
 import reactivechallenge.pragma.skillmanagementservice.mapper.DatabaseErrorMapper;
 import reactivechallenge.pragma.skillmanagementservice.mapper.SkillEntityMapper;
 import reactivechallenge.pragma.skillmanagementservice.mapper.SkillTechnologyEntityMapper;
@@ -152,4 +153,55 @@ class SkillRepositoryImplTest {
         verify(skillRepositoryMock).count();
     }
 
+    @Test
+    @DisplayName("Exists returns true when technology exists")
+    void existsReturnsTrueWhenTechnologyExists() {
+        // Arrange
+        List<Long> skillIds = List.of(1L);
+        SkillEntity technologyEntity = new SkillEntity(1L, "Java", "description", 3);
+        when(skillRepositoryMock.findAllById(skillIds)).thenReturn(Flux.just(technologyEntity));
+
+        // Act
+        Mono<Boolean> result = skillRepositoryImpl.exists(skillIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(true)
+                .verifyComplete();
+        verify(skillRepositoryMock).findAllById(skillIds);
+    }
+
+    @Test
+    @DisplayName("Exists returns false when skill does not exist")
+    void existsReturnsFalseWhenSkillDoesNotExist() {
+        // Arrange
+        List<Long> skillIds = List.of(999L);
+        when(skillRepositoryMock.findAllById(skillIds)).thenReturn(Flux.empty());
+
+        // Act
+        Mono<Boolean> result = skillRepositoryImpl.exists(skillIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(false)
+                .verifyComplete();
+        verify(skillRepositoryMock).findAllById(skillIds);
+    }
+
+    @Test
+    @DisplayName("Exists maps DataAccessException to GenericDataBaseException")
+    void existsMapsException() {
+        // Arrange
+        List<Long> skillIds = List.of(1L);
+        when(skillRepositoryMock.findAllById(skillIds)).thenReturn(Flux.error(new RuntimeException("Database error")));
+
+        // Act
+        Mono<Boolean> result = skillRepositoryImpl.exists(skillIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(GenericDatabaseException.class)
+                .verify();
+        verify(skillRepositoryMock).findAllById(skillIds);
+    }
 }

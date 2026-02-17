@@ -28,9 +28,10 @@ import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -219,5 +220,64 @@ class SkillHandlerTest {
         Mockito.verify(retrieveSkillsServicePort).retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
                 , Mockito.any(Integer.class), Mockito.any(Integer.class));
         Mockito.verify(technologyServicePort).getTechsByIds(anyList());
+    }
+
+    @Test
+    @DisplayName("Verify if skill exists returns true")
+    void verifyIfSkillExistReturnsTrue() {
+        // Arrange
+        List<Long> skillsIds = List.of(1L);
+        String id1 = "1";
+        ServerRequest request = mock(ServerRequest.class);
+
+        given(request.queryParam("skillIds")).willReturn(Optional.of(id1));
+        given(retrieveSkillsServicePort.verifyIfExists(anyList())).willReturn(Mono.just(true));
+        given(retrieveSkillsServicePort.verifySkillIds(anyString())).willReturn(skillsIds);
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.verifyIfSkillsExists(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .expectNextMatches(serverResponse -> serverResponse.statusCode() == HttpStatus.OK)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Verify if skill exists returns false")
+    void verifyIfSkillExistReturnsFalse() {
+        // Arrange
+        String skillId = "999";
+        List<Long> skillsIds= List.of(999L);
+        ServerRequest request = mock(ServerRequest.class);
+
+        given(request.queryParam("skillIds")).willReturn(Optional.of(skillId));
+        given(retrieveSkillsServicePort.verifyIfExists(anyList())).willReturn(Mono.just(false));
+        given(retrieveSkillsServicePort.verifySkillIds(anyString())).willReturn(skillsIds);
+
+        // Act
+        Mono<ServerResponse> responseMono = skillHandler.verifyIfSkillsExists(request);
+
+        // Assert
+        StepVerifier.create(responseMono)
+                .expectNextMatches(serverResponse -> serverResponse.statusCode() == HttpStatus.OK)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Verify if skill exists fails when skillIds are not sent")
+    void verifyIfSkillExistFailsWithInvalidTechId() {
+        // Arrange
+        ServerRequest request = mock(ServerRequest.class);
+
+        given(request.queryParam("skillIds")).willReturn(Optional.empty());
+        given(retrieveSkillsServicePort.verifySkillIds(null)).willThrow(new IllegalArgumentException());
+
+        // Act & Assert
+        StepVerifier.create(
+                        Mono.defer(() -> skillHandler.verifyIfSkillsExists(request))
+                )
+                .expectError(IllegalArgumentException.class)
+                .verify();
     }
 }

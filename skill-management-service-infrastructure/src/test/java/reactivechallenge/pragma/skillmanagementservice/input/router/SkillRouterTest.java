@@ -83,4 +83,55 @@ class SkillRouterTest {
                 .isEqualTo(listSkillResponseDto);
     }
 
+    @Test
+    @DisplayName("Router routes GET /exists to handler and returns true when exists")
+    void verifySkillExistsRouteReturnsTrue() {
+        // Arrange
+        Long skillId = 1L;
+
+        when(skillHandlerMock.verifyIfSkillsExists(any())).thenReturn(
+                ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(true)
+        );
+
+        WebTestClient webTestClient = WebTestClient
+                .bindToRouterFunction(skillRouter.skillRoutes(skillHandlerMock))
+                .build();
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/exists", skillId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Boolean.class)
+                .isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("Router routes GET /exists to handler and returns false when not exists")
+    void verifySkillExistsRouteReturnsFalse() {
+        // Arrange
+        Long skillId = 999L;
+
+        when(skillHandlerMock.verifyIfSkillsExists(any())).thenReturn(
+                ServerResponse.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(false)
+        );
+
+        WebTestClient webTestClient = WebTestClient
+                .bindToRouterFunction(skillRouter.skillRoutes(skillHandlerMock))
+                .build();
+
+        // Act & Assert
+        webTestClient.get()
+                .uri("/exists", skillId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Boolean.class)
+                .isEqualTo(false);
+    }
 }

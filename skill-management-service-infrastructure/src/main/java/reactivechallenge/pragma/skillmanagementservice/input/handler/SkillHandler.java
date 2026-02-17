@@ -15,6 +15,9 @@ import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePor
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+import java.util.Optional;
+
 @Component
 @Slf4j
 public class SkillHandler {
@@ -100,4 +103,17 @@ public class SkillHandler {
         return number;
     }
 
+    public Mono<ServerResponse> verifyIfSkillsExists(ServerRequest request) {
+        return Mono.just(getSkillIdsFromRequest(request))
+                .flatMap(retrieveSkillsServicePort::verifyIfExists)
+                .flatMap(exists -> ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(exists))
+                .onErrorResume(NumberFormatException.class,
+                        e -> ServerResponse.badRequest()
+                                .bodyValue("Formato de IDs inválido. Deben ser números."));
+    }
+
+    private List<Long> getSkillIdsFromRequest(ServerRequest request) {
+        Optional<String> stringSkillIds =  request.queryParam("skillIds");
+        return retrieveSkillsServicePort.verifySkillIds(stringSkillIds.orElse(null));
+    }
 }

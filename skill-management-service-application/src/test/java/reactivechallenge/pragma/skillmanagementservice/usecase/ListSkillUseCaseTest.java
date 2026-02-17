@@ -1,5 +1,6 @@
 package reactivechallenge.pragma.skillmanagementservice.usecase;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +19,9 @@ import reactor.test.StepVerifier;
 
 import java.util.List;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class ListSkillUseCaseTest {
 
@@ -29,7 +33,6 @@ class ListSkillUseCaseTest {
 
     @Test
     void retrieveSkillsResponseSuccessful(){
-
         // Arrange
         List<TechnologyExternalModel> externalModelList = List.of(new TechnologyExternalModel(1L, "test")
         , new TechnologyExternalModel(3L, "test"), new TechnologyExternalModel(2L, "test"));
@@ -54,5 +57,128 @@ class ListSkillUseCaseTest {
         Mockito.verify(skillRepositoryPort).getSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
                 , Mockito.any(Integer.class), Mockito.any(Integer.class));
         Mockito.verify(skillRepositoryPort).countSkills();
+    }
+
+    @Test
+    @DisplayName("Verify if exists returns true when skill exists")
+    void verifyIfExistsReturnsTrue() {
+        // Arrange
+        List<Long> skillsIds = List.of(1L);
+        when(skillRepositoryPort.exists(skillsIds)).thenReturn(Mono.just(true));
+
+        // Act
+        Mono<Boolean> result = listSkillUseCase.verifyIfExists(skillsIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(true)
+                .verifyComplete();
+
+        verify(skillRepositoryPort).exists(skillsIds);
+    }
+
+    @Test
+    @DisplayName("Verify if exists returns false when skill does not exist")
+    void verifyIfExistsReturnsFalse() {
+        // Arrange
+        List<Long> skillsIds = List.of(999L);
+        when(skillRepositoryPort.exists(skillsIds)).thenReturn(Mono.just(false));
+
+        // Act
+        Mono<Boolean> result = listSkillUseCase.verifyIfExists(skillsIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(false)
+                .verifyComplete();
+
+        verify(skillRepositoryPort).exists(skillsIds);
+    }
+
+    @Test
+    @DisplayName("Verify if exists propagates error from repository")
+    void verifyIfExistsPropagatesError() {
+        // Arrange
+        List<Long> skillsIds = List.of(1L);
+        RuntimeException expectedException = new RuntimeException("Database error");
+        when(skillRepositoryPort.exists(skillsIds)).thenReturn(Mono.error(expectedException));
+
+        // Act
+        Mono<Boolean> result = listSkillUseCase.verifyIfExists(skillsIds);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(skillRepositoryPort).exists(skillsIds);
+    }
+
+    @Test
+    @DisplayName("Verify if exists handles null id gracefully")
+    void verifyIfExistsHandlesNullId() {
+        // Arrange
+        when(skillRepositoryPort.exists(null)).thenReturn(Mono.just(false));
+
+        // Act
+        Mono<Boolean> result = listSkillUseCase.verifyIfExists(null);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(false)
+                .verifyComplete();
+
+        verify(skillRepositoryPort).exists(null);
+    }
+
+    @Test
+    @DisplayName("verifySkillsIds retorna lista de Longs a partir de string de ids separados por comas")
+    void verifySkillsIdsReturnsListOfLongs() {
+        // Arrange
+        String techIdsAsString = "1, 2, 3";
+
+        // Act
+        List<Long> result = listSkillUseCase.verifySkillIds(techIdsAsString);
+
+        // Assert
+        assert result.equals(List.of(1L, 2L, 3L));
+    }
+
+    @Test
+    @DisplayName("verifySkillsIds lanza IllegalArgumentException cuando se pasa un string nulo")
+    void verifySkillsIdsThrowExeptionWhenNullString() {
+        // Arrange
+        RuntimeException exceptionExpected = new IllegalArgumentException("No se proporcionaron IDs de sills. Asegúrate de incluir el " +
+                "parámetro 'skillIds' con al menos un ID.");
+        RuntimeException exceptionObtained=null;
+
+        // Act
+        try {
+            listSkillUseCase.verifySkillIds(null);
+        } catch (IllegalArgumentException e) {
+            exceptionObtained = e;
+        }
+
+        // Assert
+        assert exceptionObtained!=null && exceptionObtained.getMessage().equals(exceptionExpected.getMessage());
+    }
+
+    @Test
+    @DisplayName("verifySkillsIds lanza IllegalArgumentException cuando se pasa un string de letras separados por coma")
+    void verifySkillsIdsThrowExeptionWhenStringIsNotNumbers() {
+        // Arrange
+        String ids = "a, b, c";
+        RuntimeException exceptionExpected = new IllegalArgumentException("Formato de IDs inválido. Todos los IDs deben ser números.");
+        RuntimeException exceptionObtained=null;
+
+        // Act
+        try {
+            listSkillUseCase.verifySkillIds(ids);
+        } catch (IllegalArgumentException e) {
+            exceptionObtained = e;
+        }
+
+        // Assert
+        assert exceptionObtained!=null && exceptionObtained.getMessage().equals(exceptionExpected.getMessage());
     }
 }

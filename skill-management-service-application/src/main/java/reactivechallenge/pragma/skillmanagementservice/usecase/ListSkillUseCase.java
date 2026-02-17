@@ -8,6 +8,11 @@ import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortO
 import reactivechallenge.pragma.skillmanagementservice.spi.ISkillRepositoryPort;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 public class ListSkillUseCase implements IRetrieveSkillsServicePort {
 
     private final ISkillRepositoryPort skillRepositoryPort;
@@ -30,5 +35,30 @@ public class ListSkillUseCase implements IRetrieveSkillsServicePort {
         ).map(tuple -> new SkillPaginationResult<>(tuple.getT1(), tuple.getT2()));
         // tuple.getT1() -> es la lista de eskills obtenida en el metodo .zip
         // tuple.getT2() -> es la cantidad de skills obtenido en el metodo .zip
+    }
+    
+    @Override
+    public Mono<Boolean> verifyIfExists(List<Long> ids) {
+        return skillRepositoryPort.exists(ids);
+    }
+
+    @Override
+    public List<Long> verifySkillIds(String skillIdsAsString){
+        Optional<String> skillIdsAsStringOpt = Optional.ofNullable(skillIdsAsString);
+        List<String> skillIds = skillIdsAsStringOpt
+                .map(idList -> Arrays.stream(idList.split(","))
+                        .map(idString -> idString.replaceAll("[\"/\\\\]", "").trim())
+                        .toList())
+                .orElse(Collections.emptyList());
+
+        if(skillIds.isEmpty()){
+            throw new IllegalArgumentException("No se proporcionaron IDs de sills. Asegúrate de incluir el " +
+                    "parámetro 'skillIds' con al menos un ID.");
+        }
+        if(skillIds.stream().anyMatch(id -> !id.matches("\\d+"))){
+            throw new IllegalArgumentException("Formato de IDs inválido. Todos los IDs deben ser números.");
+        }
+
+        return skillIds.stream().map(Long::valueOf).toList();
     }
 }

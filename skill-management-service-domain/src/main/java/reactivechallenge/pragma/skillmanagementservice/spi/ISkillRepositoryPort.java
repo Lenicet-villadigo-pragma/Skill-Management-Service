@@ -6,9 +6,12 @@ import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortO
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface ISkillRepositoryPort {
     Mono<SkillModel> save(SkillModel skillModel);
     Flux<SkillModel> getSkills(SkillSortField skillSortField, SkillSortOrder skillSortOrder
             , Integer pageNumber, Integer pageSize);
     Mono<Long> countSkills();
+    Mono<Boolean> exists(List<Long> ids);
 }

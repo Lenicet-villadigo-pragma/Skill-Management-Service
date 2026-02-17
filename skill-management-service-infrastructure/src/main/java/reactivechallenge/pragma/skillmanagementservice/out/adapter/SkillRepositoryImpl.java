@@ -47,18 +47,18 @@ public record SkillRepositoryImpl(
         Sort sort = Sort.by(Sort.Direction.fromString(skillSortOrder.getSortOrder()), skillSortField.getFieldName());
         Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
-        return skillRepository.findAllBy(pageable).concatMap(skillEntity -> {
-            return getTechsBySkillId(skillEntity.id()).collectList()
-                    .flatMap(techList ->{
+        return skillRepository.findAllBy(pageable).concatMap(skillEntity ->
+             getTechsBySkillId(skillEntity.id()).collectList()
+                     .flatMap(techList ->{
                         if (techList.isEmpty()) {
                             return Mono.error(new BusinessDomainException("Skill sin tecnologías"));
                         }
                         return Mono.just(skillEntityMapper.toModel(skillEntity, techList));
-                    }).onErrorResume(error -> {
+                     }).onErrorResume(error -> {
                         log.warn("Omitiendo skill {} por error: {}", skillEntity.id(), error.getMessage());
                         return Mono.empty();
-                    });
-        });
+                     })
+        );
     }
 
     @Override
@@ -66,6 +66,13 @@ public record SkillRepositoryImpl(
         return skillRepository.count();
     }
 
+    @Override
+    public Mono<Boolean> exists(List<Long> ids) {
+        return skillRepository.findAllById(ids)
+                .collectList()
+                .map(listTechs -> listTechs.size() == ids.size())
+                .onErrorMap(databaseErrorMapper::map);
+    }
 
     private Mono<SkillModel> saveSkillTechnologies(SkillModel skillModel) {
         List<TechnologyExternalModel> technologies = skillModel.technologies();
