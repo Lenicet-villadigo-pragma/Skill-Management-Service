@@ -140,7 +140,7 @@ class SkillRepositoryImplTest {
     @DisplayName("countSkills returns correctly")
     void countSkillsTest() {
          // Arrange
-        Mono<Long> actual = null;
+        Mono<Long> actual;
        Long expected = 1L;
 
        when(skillRepositoryMock.count()).thenReturn(Mono.just(1L));
