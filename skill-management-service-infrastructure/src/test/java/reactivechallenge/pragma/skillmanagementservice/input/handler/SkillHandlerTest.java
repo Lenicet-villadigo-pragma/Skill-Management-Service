@@ -150,10 +150,10 @@ class SkillHandlerTest {
         List<ListSkillResponseDto> listSkillResponseDto = List.of(new ListSkillResponseDto(1L, "test", techResponseForListDtos));
         SkillPaginatedDto<ListSkillResponseDto> responseExpected = new SkillPaginatedDto<>(listSkillResponseDto, 1L, 0, 10);
 
-        given(request.pathVariable("sortField")).willReturn("name");
-        given(request.pathVariable("sortOrder")).willReturn("asc");
-        given(request.pathVariable("pageNumber")).willReturn("0");
-        given(request.pathVariable("pageSize")).willReturn("10");
+        given(request.queryParam("sortField")).willReturn(Optional.of("name"));
+        given(request.queryParam("sortOrder")).willReturn(Optional.of("asc"));
+        given(request.queryParam("pageNumber")).willReturn(Optional.of("0"));
+        given(request.queryParam("pageSize")).willReturn(Optional.of("10"));
         when(retrieveSkillsServicePort.retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
                 , Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(skillPaginationResultMono);
         when(technologyServicePort.getTechsByIds(anyList())).thenReturn(technologyExternalModelFlux);
@@ -194,10 +194,10 @@ class SkillHandlerTest {
         List<ListSkillResponseDto> listSkillResponseDto = List.of(new ListSkillResponseDto(1L, "test", techResponseForListDtos));
         SkillPaginatedDto<ListSkillResponseDto> responseExpected = new SkillPaginatedDto<>(listSkillResponseDto, 1L, 0, 10);
 
-        given(request.pathVariable("sortField")).willReturn(null);
-        given(request.pathVariable("sortOrder")).willReturn(null);
-        given(request.pathVariable("pageNumber")).willReturn(null);
-        given(request.pathVariable("pageSize")).willReturn("string");
+        given(request.queryParam("sortField")).willReturn(Optional.empty());
+        given(request.queryParam("sortOrder")).willReturn(Optional.empty());
+        given(request.queryParam("pageNumber")).willReturn(Optional.empty());
+        given(request.queryParam("pageSize")).willReturn(Optional.of("string"));
         when(retrieveSkillsServicePort.retrieveSkills(Mockito.any(SkillSortField.class), Mockito.any(SkillSortOrder.class)
                 , Mockito.any(Integer.class), Mockito.any(Integer.class))).thenReturn(skillPaginationResultMono);
         when(technologyServicePort.getTechsByIds(anyList())).thenReturn(technologyExternalModelFlux);

@@ -19,6 +19,8 @@ import reactivechallenge.pragma.skillmanagementservice.input.dto.ListSkillRespon
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillCreateDto;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.SkillPaginatedDto;
 import reactivechallenge.pragma.skillmanagementservice.input.handler.SkillHandler;
+import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortField;
+import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortOrder;
 
 import static org.springframework.web.reactive.function.server.RequestPredicates.*;
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
@@ -84,10 +86,10 @@ public class SkillRouter {
                             )
                     },
                     parameters = {
-                            @Parameter(in = ParameterIn.PATH, name = "sortField", description = "campo opcional para ordenar, valore: name o total_technologies")
-                            ,@Parameter(in = ParameterIn.PATH, name = "sortOrder", description = "Sentido de ordenación, opcional. valores: asc o desc")
-                            ,@Parameter(in = ParameterIn.PATH, name = "pageNumber", description = "Número de página, opcional")
-                            ,@Parameter(in = ParameterIn.PATH, name = "pageSize", description = "Cantidad de registros por página, opcional")
+                            @Parameter(in = ParameterIn.QUERY, name = "sortField", description = "campo opcional para ordenar, valore: name o total_technologies", schema = @Schema(implementation = SkillSortField.class))
+                            ,@Parameter(in = ParameterIn.QUERY, name = "sortOrder", description = "Sentido de ordenación, opcional. valores: asc o desc", schema = @Schema(implementation = SkillSortOrder.class))
+                            ,@Parameter(in = ParameterIn.QUERY, name = "pageNumber", description = "Número de página, opcional", schema = @Schema(implementation = Integer.class))
+                            ,@Parameter(in = ParameterIn.QUERY, name = "pageSize", description = "Cantidad de registros por página, opcional", schema = @Schema(implementation = Integer.class))
 
                     })
             )
