@@ -60,7 +60,7 @@ public class SkillRouter {
                     )
             )
             ,@RouterOperation(
-            path = "/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}",
+            path = "/retrieve",
             produces = {
                     MediaType.APPLICATION_JSON_VALUE
             },
@@ -144,7 +144,7 @@ public class SkillRouter {
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
         return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
-                .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills)
+                .andRoute(GET("/retrieve"), skillHandler::listSkills)
                 .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists)
                 .andRoute(GET("/getByIds"), skillHandler::listSkillsById);
     }
