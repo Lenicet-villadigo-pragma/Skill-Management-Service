@@ -119,8 +119,7 @@ public class SkillRouter {
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
         return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
-                .andRoute(GET("/retrieve"), skillHandler::listSkills);
-                .andRoute(GET("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"), skillHandler::listSkills)
+                .andRoute(GET("/retrieve"), skillHandler::listSkills)
                 .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists);
     }
 }
