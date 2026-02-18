@@ -59,7 +59,7 @@ public class SkillRouter {
                     )
             )
             ,@RouterOperation(
-            path = "/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}",
+            path = "/retrieve",
             produces = {
                     MediaType.APPLICATION_JSON_VALUE
             },
