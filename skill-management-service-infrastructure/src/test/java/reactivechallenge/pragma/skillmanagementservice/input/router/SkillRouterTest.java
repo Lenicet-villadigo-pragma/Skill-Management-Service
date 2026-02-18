@@ -74,7 +74,7 @@ class SkillRouterTest {
 
         // Act & Assert
         webTestClient.get()
-                .uri("/retrieve/sortField/{sortField}/sortOrder/{sortOrder}/pageSize/{pageSize}/pageNumber/{pageNumber}"
+                .uri("/retrieve?sortField={sortField}&sortOrder={sortOrder}&pageSize={pageSize}&pageNumber={pageNumber}"
                         ,"name", "asc", "10", "0")
                 .exchange()
                 .expectStatus().isOk()
