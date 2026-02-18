@@ -47,10 +47,10 @@ public class SkillHandler {
     }
 
     public Mono<ServerResponse> listSkills(ServerRequest request){
-        SkillSortField skillSortField = getSKillSortField(request.pathVariable("sortField"));
-        SkillSortOrder skillSortOrder = getSKillSortOrder(request.pathVariable("sortOrder"));
-        Integer pageNumber = getValidateNumber(request.pathVariable("pageNumber"), sortPageNumberDefault);
-        Integer pageSize = getValidateNumber(request.pathVariable("pageSize"), sortPageSizeDefault);
+        SkillSortField skillSortField = getSKillSortField(request.queryParam("sortField").orElse(null));
+        SkillSortOrder skillSortOrder = getSKillSortOrder(request.queryParam("sortOrder").orElse(null));
+        Integer pageNumber = getValidateNumber(request.queryParam("pageNumber").orElse(null), sortPageNumberDefault);
+        Integer pageSize = getValidateNumber(request.queryParam("pageSize").orElse(null), sortPageSizeDefault);
 
 
         return retrieveSkillsServicePort
