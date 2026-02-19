@@ -9,4 +9,5 @@ import java.util.List;
 public interface ITechnologyServicePort {
     Mono<Boolean> existsById(List<String> technologyIds);
     Flux<TechnologyExternalModel> getTechsByIds (List<String> techIds);
+    Mono<Void> deleteTechById(String techId);
 }

@@ -69,6 +69,30 @@ public record SkillRepositoryImpl(
         return getSkillModelFlux(skillRepository.findAllById(ids));
     }
 
+    @Override
+    public Mono<Void> deleteSkillByIds(List<Long> ids) {
+        return skillRepository.deleteAllById(ids)
+                .onErrorMap(databaseErrorMapper::map);
+    }
+
+    @Override
+    public Flux<Long> getTechIdsBySkillId(Long skillId) {
+        return skillTechnologyRepository.findAllBySkillId(skillId)
+                .map(SkillTechnologyEntity::technologyId);
+    }
+
+    @Override
+    public Mono<Void> deleteSkillTechnologiesRelation(Long skillId) {
+        return skillTechnologyRepository.deleteBySkillId(skillId)
+                .onErrorMap(databaseErrorMapper::map);
+    }
+
+    @Override
+    public Mono<Long> getTotalTechRelationWithSkills(Long techId) {
+        return skillTechnologyRepository.countByTechnologyId(techId);
+    }
+
+
     private Mono<SkillModel> saveSkillTechnologies(SkillModel skillModel) {
         List<TechnologyExternalModel> technologies = skillModel.technologies();
 

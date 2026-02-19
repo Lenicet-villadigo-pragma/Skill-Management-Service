@@ -9,9 +9,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.EntityResponse;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactivechallenge.pragma.skillmanagementservice.api.IDeleteSkillServicePort;
 import reactivechallenge.pragma.skillmanagementservice.api.IRegisterSkillServicePort;
 import reactivechallenge.pragma.skillmanagementservice.api.IRetrieveSkillsServicePort;
 import reactivechallenge.pragma.skillmanagementservice.exception.BusinessDomainException;
@@ -45,13 +47,17 @@ class SkillHandlerTest {
 
     @Mock
     ITechnologyServicePort technologyServicePort;
+    @Mock
+    IDeleteSkillServicePort deleteSkillServicePort;
+    @Mock
+    TransactionalOperator transactionalOperator;
 
     private SkillHandler skillHandler;
 
     @BeforeEach
     void setUp() {
         skillHandler = new SkillHandler(registerSkillServicePort, retrieveSkillsServicePort
-        ,technologyServicePort,0,10);
+        ,technologyServicePort,0,10, deleteSkillServicePort, transactionalOperator);
     }
 
     @Test

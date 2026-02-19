@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactivechallenge.pragma.skillmanagementservice.exception.ExceptionDelete;
 import reactivechallenge.pragma.skillmanagementservice.exception.InconsistencyDataException;
 import reactivechallenge.pragma.skillmanagementservice.model.TechnologyExternalModel;
 import reactivechallenge.pragma.skillmanagementservice.spi.ITechnologyServicePort;
@@ -66,6 +67,22 @@ public class TechnologyServiceAdapter implements ITechnologyServicePort {
                             , techIdsAsString, e.getMessage());
 
                     return  Flux.empty();
+                });
+    }
+
+    @Override
+    public Mono<Void> deleteTechById(String techId) {
+        return webClient.delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/deleteByIds")
+                        .queryParam("techIds", techId)
+                        .build())
+                .retrieve()
+                .bodyToMono(Void.class)
+                .timeout(Duration.ofSeconds(5))
+                .onErrorResume(e -> {
+                    log.error("Error al eliminar las tecnologías con id {}: {}.", techId, e.getMessage());
+                    return  Mono.error(new ExceptionDelete(String.format("Error al eliminar la tecnología con id %s",techId), e));
                 });
     }
 }

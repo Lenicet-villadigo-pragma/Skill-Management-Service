@@ -15,4 +15,8 @@ public interface ISkillRepositoryPort {
     Mono<Long> countSkills();
     Mono<Boolean> exists(List<Long> ids);
     Flux<SkillModel> getSkillsById(List<Long> ids);
+    Mono<Void> deleteSkillByIds(List<Long> ids);
+    Flux<Long> getTechIdsBySkillId(Long skillId);
+    Mono<Void> deleteSkillTechnologiesRelation(Long skillId);
+    Mono<Long> getTotalTechRelationWithSkills(Long techId);
 }

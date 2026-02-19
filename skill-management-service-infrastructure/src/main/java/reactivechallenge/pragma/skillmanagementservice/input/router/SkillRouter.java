@@ -141,11 +141,33 @@ public class SkillRouter {
                             @Parameter(in = ParameterIn.QUERY, name = "skillIds", description = "list of skills IDs")
                     })
             )
+            ,@RouterOperation(path = "/deleteByIds",
+                produces = {MediaType.APPLICATION_JSON_VALUE},
+                method = RequestMethod.DELETE,
+                beanClass = SkillHandler.class,
+                beanMethod = "deleteSkillsByIds",
+                operation = @Operation(
+                    operationId = "deleteSkillsByIds",
+                    summary = "Eliminar las capacidades por ids",
+                    description = "Elimina capacidades que coincidan con los ids",
+                    tags = {"Gestión de Capacidades"},
+                    responses = {
+                            @ApiResponse(
+                                    responseCode = "200",
+                                    description = "Skills deleted",
+                                    content = @Content(schema = @Schema(implementation = String.class))
+                            )
+                    },
+                    parameters = {
+                            @Parameter(in = ParameterIn.QUERY, name = "skillIds", description = "list of skills IDs")
+                    })
+            )
     })
     public RouterFunction<ServerResponse> skillRoutes(SkillHandler skillHandler) {
         return route(POST("/create").and(accept(MediaType.APPLICATION_JSON)), skillHandler::createSkill)
                 .andRoute(GET("/retrieve"), skillHandler::listSkills)
                 .andRoute(GET("/exists"), skillHandler::verifyIfSkillsExists)
-                .andRoute(GET("/getByIds"), skillHandler::listSkillsById);
+                .andRoute(GET("/getByIds"), skillHandler::listSkillsById)
+                .andRoute(DELETE("/deleteByIds"), skillHandler::deleteSkillsByIds);
     }
 }

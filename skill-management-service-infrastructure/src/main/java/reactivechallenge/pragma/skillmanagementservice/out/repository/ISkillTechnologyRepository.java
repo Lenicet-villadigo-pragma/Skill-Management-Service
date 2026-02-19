@@ -8,4 +8,5 @@ import reactor.core.publisher.Mono;
 public interface ISkillTechnologyRepository extends ReactiveCrudRepository<SkillTechnologyEntity, Long> {
     Mono<Void> deleteBySkillId(Long skillId);
     Flux<SkillTechnologyEntity> findAllBySkillId(Long skillId);
+    Mono<Long> countByTechnologyId(Long techId);
 }

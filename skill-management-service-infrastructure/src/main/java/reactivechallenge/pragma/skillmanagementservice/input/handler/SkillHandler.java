@@ -4,10 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.reactive.TransactionalOperator;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactivechallenge.pragma.skillmanagementservice.api.IDeleteSkillServicePort;
 import reactivechallenge.pragma.skillmanagementservice.api.IRegisterSkillServicePort;
 import reactivechallenge.pragma.skillmanagementservice.api.IRetrieveSkillsServicePort;
+import reactivechallenge.pragma.skillmanagementservice.exception.ExceptionDelete;
+import reactivechallenge.pragma.skillmanagementservice.exception.GenericDatabaseException;
 import reactivechallenge.pragma.skillmanagementservice.input.dto.*;
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortField;
 import reactivechallenge.pragma.skillmanagementservice.model.criteria.SkillSortOrder;
@@ -27,16 +31,21 @@ public class SkillHandler {
     private final ITechnologyServicePort technologyServicePort;
     private final int sortPageNumberDefault;
     private final int sortPageSizeDefault;
+    private final IDeleteSkillServicePort deleteSkillServicePort;
+    private final TransactionalOperator transactionalOperator;
 
     public SkillHandler(IRegisterSkillServicePort registerSkillServicePort,
                         IRetrieveSkillsServicePort retrieveSkillsServicePort, ITechnologyServicePort technologyServicePort
     , @Value("${app.pagination.default-page}") int sortPageNumberDefault
-    , @Value("${app.pagination.default-size}") int sortPageSizeDefault) {
+    , @Value("${app.pagination.default-size}") int sortPageSizeDefault
+    ,IDeleteSkillServicePort deleteSkillServicePort, TransactionalOperator transactionalOperator) {
         this.registerSkillServicePort = registerSkillServicePort;
         this.retrieveSkillsServicePort = retrieveSkillsServicePort;
         this.technologyServicePort = technologyServicePort;
         this.sortPageNumberDefault = sortPageNumberDefault;
         this.sortPageSizeDefault = sortPageSizeDefault;
+        this.deleteSkillServicePort = deleteSkillServicePort;
+        this.transactionalOperator = transactionalOperator;
     }
 
     public Mono<ServerResponse> createSkill(ServerRequest request) {
@@ -133,6 +142,16 @@ public class SkillHandler {
                 .flatMap(listSkillResponseDto ->
                     ServerResponse.ok().contentType(MediaType.APPLICATION_JSON).bodyValue(listSkillResponseDto)
                 );
+    }
+
+    public Mono<ServerResponse> deleteSkillsByIds(ServerRequest serverRequest){
+        List<Long> skillsIds = getSkillIdsFromRequest(serverRequest);
+
+        return deleteSkillServicePort.deleteSkillsByIds(skillsIds)
+                .as(transactionalOperator::transactional)
+                .then(ServerResponse.ok().bodyValue("Capacidades eliminadas"))
+                .doOnError(e -> log.error("Transacción abortada: {}", e.getMessage()))
+                .onErrorComplete();
     }
 
 }
